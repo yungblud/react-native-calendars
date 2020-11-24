@@ -286,8 +286,8 @@ class Calendar extends Component {
           testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
           state={state}
           theme={this.props.theme}
-          onPress={this.pressDay}
-          onLongPress={this.longPressDay}
+          onPress={!marking.disabled ? this.pressDay : () => {}}
+          onLongPress={!marking.disabled ? this.longPressDay : () => {}}
           date={dateAsObject}
           marking={marking}
           accessibilityLabel={accessibilityLabel}
