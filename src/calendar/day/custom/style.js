@@ -15,7 +15,7 @@ export default function styleConstructor(theme={}) {
       marginTop: Platform.OS === 'android' ? 4 : 6,
       fontSize: appStyle.textDayFontSize,
       fontFamily: appStyle.textDayFontFamily,
-      fontWeight: appStyle.textDayFontWeight,
+      fontWeight: "400",
       color: appStyle.dayTextColor,
       backgroundColor: 'rgba(255, 255, 255, 0)'
     },
@@ -27,10 +27,11 @@ export default function styleConstructor(theme={}) {
       borderRadius: 16
     },
     today: {
-      backgroundColor: appStyle.todayBackgroundColor
+      backgroundColor: "#eeeeee",
+      borderRadius: 16
     },
     todayText: {
-      color: appStyle.todayTextColor
+      color: "#222222"
     },
     selectedText: {
       color: appStyle.selectedDayTextColor

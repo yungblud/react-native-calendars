@@ -12,6 +12,16 @@ export default function shouldComponentUpdate(nextProps, nextState) {
     return prev;
   }, {update: false});
 
+  shouldUpdate = ['dayItemWidth'].reduce((prev, next) => {
+    if (nextState[next] !== this.state[next]) {
+      return {
+        update: true,
+        field: next
+      };
+    }
+    return prev;
+  }, shouldUpdate);
+
   shouldUpdate = ['markedDates', 'hideExtraDays', 'displayLoadingIndicator'].reduce((prev, next) => {
     if (!prev.update && nextProps[next] !== this.props[next]) {
       return {

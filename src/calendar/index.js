@@ -112,7 +112,8 @@ class Calendar extends Component {
 
     this.style = styleConstructor(this.props.theme);
     this.state = {
-      currentMonth: props.current ? parseDate(props.current) : XDate()
+      currentMonth: props.current ? parseDate(props.current) : XDate(),
+      dayItemWidth: 0
     };
 
     this.updateMonth = this.updateMonth.bind(this);
@@ -206,10 +207,37 @@ class Calendar extends Component {
     const DayComp = this.getDayComponent();
     const date = day.getDate();
     const dateAsObject = xdateToData(day);
+    let startingDay = null
+    let endingDay = null
+    if (this.props.markedDates) {
+      Object.keys(this.props.markedDates).forEach((key) => {
+        if (this.props.markedDates[key].startingDay) {
+          startingDay = key
+        } else if (this.props.markedDates[key].endingDay) {
+          endingDay = key
+        }
+      })
+    }
+    const isStartingDay = startingDay !== null && startingDay === dateAsObject.dateString && this.props.markedDates && Object.keys(this.props.markedDates).length > 1
+    const isEndingDay = endingDay !== null && endingDay === dateAsObject.dateString && this.props.markedDates && Object.keys(this.props.markedDates).length > 1
+    const dateIndex = Object.keys(this.props.markedDates ? this.props.markedDates : []).findIndex((val) => val === dateAsObject.dateString)
+    const isMidDay = this.props.markedDates && !isStartingDay && !isEndingDay && dateIndex !== -1 && dateIndex !== 0 && dateIndex !== Object.keys(this.props.markedDates).length - 1
     const accessibilityLabel = this.getAccessibilityLabel(state, day);
 
+    const handleLayout = (e) => {
+      const { width } = e.nativeEvent.layout
+      this.setState((prevState) => ({
+        ...prevState,
+        dayItemWidth: width
+      }))
+    }
+
+    const { dayItemWidth } = this.state
+
     return (
-      <View style={{flex: 1, alignItems: 'center'}} key={id}>
+      <View onLayout={handleLayout} style={[{ flex: 1, alignItems: 'center', zIndex: 50 }, isMidDay && { backgroundColor: "#fef4e6" }]} key={id}>
+        {isStartingDay && <View style={{ position: "absolute", top: 0, right: 0, left: dayItemWidth / 2, bottom: 0, backgroundColor: "#fef4e6" }} />}
+        {isEndingDay && <View style={{ position: "absolute", top: 0, right: dayItemWidth / 2, left: 0, bottom: 0, backgroundColor: "#fef4e6" }} />}
         <DayComp
           testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
           state={state}
@@ -336,8 +364,7 @@ class Calendar extends Component {
     if (this.props.showWeekNumbers) {
       week.unshift(this.renderWeekNumber(days[days.length - 1].getWeek()));
     }
-
-    return (<View style={this.style.week} key={id}>{week}</View>);
+    return (<View style={[this.style.week]} key={id}>{week}</View>);
   }
 
   render() {
@@ -388,10 +415,17 @@ class Calendar extends Component {
       renderHeader: this.props.renderHeader
     };
     const CustomHeader = this.props.customHeader;
+    const innerStyles = [
+      this.style.container,
+      // this.props.style,
+      {
+        flex: 1
+      }
+    ]
     return (
       <GestureComponent {...gestureProps}>
         <View
-          style={[this.style.container, this.props.style]}
+          style={innerStyles}
           accessibilityElementsHidden={this.props.accessibilityElementsHidden} // iOS
           importantForAccessibility={this.props.importantForAccessibility} // Android
         >
