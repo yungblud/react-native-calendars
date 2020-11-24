@@ -207,37 +207,6 @@ class Calendar extends Component {
     const DayComp = this.getDayComponent();
     const date = day.getDate();
     const dateAsObject = xdateToData(day);
-    let startingDay = null;
-    let endingDay = null;
-    if (this.props.markedDates) {
-      Object.keys(this.props.markedDates).forEach((key) => {
-        if (this.props.markedDates[key].startingDay) {
-          startingDay = key;
-        } else if (this.props.markedDates[key].endingDay) {
-          endingDay = key;
-        }
-      });
-    }
-    const isStartingDay =
-      startingDay !== null &&
-      startingDay === dateAsObject.dateString &&
-      this.props.markedDates &&
-      Object.keys(this.props.markedDates).length > 1;
-    const isEndingDay =
-      endingDay !== null &&
-      endingDay === dateAsObject.dateString &&
-      this.props.markedDates &&
-      Object.keys(this.props.markedDates).length > 1;
-    const dateIndex = Object.keys(this.props.markedDates ? this.props.markedDates : []).findIndex(
-      (val) => val === dateAsObject.dateString,
-    );
-    const isMidDay =
-      this.props.markedDates &&
-      !isStartingDay &&
-      !isEndingDay &&
-      dateIndex !== -1 &&
-      dateIndex !== 0 &&
-      dateIndex !== Object.keys(this.props.markedDates).length - 1;
     const accessibilityLabel = this.getAccessibilityLabel(state, day);
 
     const handleLayout = (e) => {
@@ -249,16 +218,40 @@ class Calendar extends Component {
     };
     const {dayItemWidth} = this.state;
     const marking = this.getDateMarking(day);
+
+    let prevDay = null;
+    let nextDay = null;
+    let dayIndex = -1;
+
+    const {markedDates} = this.props;
+    const dates = markedDates ? Object.keys(markedDates) : [];
+    if (markedDates) {
+      dayIndex = dates.findIndex((key) => key === dateAsObject.dateString);
+      if (dayIndex > -1) {
+        if (dayIndex < dates.length - 1) {
+          nextDay = markedDates[dates[dayIndex + 1]];
+        }
+        if (dayIndex > 0) {
+          prevDay = markedDates[dates[dayIndex - 1]];
+        }
+      }
+    }
+
     return (
       <View
         onLayout={handleLayout}
         style={[
           {flex: 1, alignItems: 'center', zIndex: 50},
-          isMidDay && !marking.disabled && {backgroundColor: '#fef4e6'},
+          !Array.isArray(marking) &&
+            dayIndex !== 0 &&
+            dayIndex !== dates.length - 1 &&
+            !marking.startingDay &&
+            !marking.endingDay &&
+            !marking.disabled && {backgroundColor: '#fef4e6'},
         ]}
         key={id}
       >
-        {isStartingDay && !marking.disabled && (
+        {marking.startingDay && nextDay && !nextDay.disabled && !marking.endingDay && !marking.disabled && (
           <View
             style={{
               position: 'absolute',
@@ -270,18 +263,23 @@ class Calendar extends Component {
             }}
           />
         )}
-        {isEndingDay && !marking.disabled && (
-          <View
-            style={{
-              position: 'absolute',
-              top: 0,
-              right: dayItemWidth / 2,
-              left: 0,
-              bottom: 0,
-              backgroundColor: '#fef4e6',
-            }}
-          />
-        )}
+        {marking.endingDay &&
+          prevDay &&
+          !prevDay.disabled &&
+          !marking.startingDay &&
+          Object.keys(this.props.markedDates).length > 1 &&
+          !marking.disabled && (
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: dayItemWidth / 2,
+                left: 0,
+                bottom: 0,
+                backgroundColor: '#fef4e6',
+              }}
+            />
+          )}
         <DayComp
           testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
           state={state}
