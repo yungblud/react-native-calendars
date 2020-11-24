@@ -686,7 +686,7 @@
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						DevelopmentTeam = D452Y9D57S;
+						DevelopmentTeam = 578PDZSTMS;
 						ProvisioningStyle = Automatic;
 					};
 					2D02E47A1E0B4A5D006451C7 = {
@@ -1337,7 +1337,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
-				DEVELOPMENT_TEAM = D452Y9D57S;
+				DEVELOPMENT_TEAM = 578PDZSTMS;
 				INFOPLIST_FILE = CalendarsExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.CalendarsExample;
@@ -1356,7 +1356,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = D452Y9D57S;
+				DEVELOPMENT_TEAM = 578PDZSTMS;
 				INFOPLIST_FILE = CalendarsExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.CalendarsExample;
