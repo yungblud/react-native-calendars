@@ -19,9 +19,7 @@ import {SELECT_DATE_SLOT} from '../testIDs';
 //Fallback for react-native-web or when RN version is < 0.44
 const {View, ViewPropTypes} = ReactNative;
 const viewPropTypes =
-  typeof document !== 'undefined'
-    ? PropTypes.shape({style: PropTypes.object})
-    : ViewPropTypes || View.propTypes;
+  typeof document !== 'undefined' ? PropTypes.shape({style: PropTypes.object}) : ViewPropTypes || View.propTypes;
 const EmptyArray = [];
 
 /**
@@ -100,11 +98,11 @@ class Calendar extends Component {
     /** Allow rendering of a totally custom header */
     customHeader: PropTypes.any,
     /** Enable the option to swipe between months. Default: false */
-    enableSwipeMonths: PropTypes.bool
+    enableSwipeMonths: PropTypes.bool,
   };
 
   static defaultProps = {
-    enableSwipeMonths: false
+    enableSwipeMonths: false,
   };
 
   constructor(props) {
@@ -113,7 +111,7 @@ class Calendar extends Component {
     this.style = styleConstructor(this.props.theme);
     this.state = {
       currentMonth: props.current ? parseDate(props.current) : XDate(),
-      dayItemWidth: 0
+      dayItemWidth: 0,
     };
 
     this.updateMonth = this.updateMonth.bind(this);
@@ -126,19 +124,22 @@ class Calendar extends Component {
     if (day.toString('yyyy MM') === this.state.currentMonth.toString('yyyy MM')) {
       return;
     }
-    this.setState({
-      currentMonth: day.clone()
-    }, () => {
-      if (!doNotTriggerListeners) {
-        const currMont = this.state.currentMonth.clone();
-        if (this.props.onMonthChange) {
-          this.props.onMonthChange(xdateToData(currMont));
+    this.setState(
+      {
+        currentMonth: day.clone(),
+      },
+      () => {
+        if (!doNotTriggerListeners) {
+          const currMont = this.state.currentMonth.clone();
+          if (this.props.onMonthChange) {
+            this.props.onMonthChange(xdateToData(currMont));
+          }
+          if (this.props.onVisibleMonthsChange) {
+            this.props.onVisibleMonthsChange([xdateToData(currMont)]);
+          }
         }
-        if (this.props.onVisibleMonthsChange) {
-          this.props.onVisibleMonthsChange([xdateToData(currMont)]);
-        }
-      }
-    });
+      },
+    );
   }
 
   _handleDayInteraction(date, interaction) {
@@ -166,11 +167,11 @@ class Calendar extends Component {
 
   addMonth = (count) => {
     this.updateMonth(this.state.currentMonth.clone().addMonths(count, true));
-  }
+  };
 
   isDateNotInTheRange = (minDate, maxDate, date) => {
     return (minDate && !dateutils.isGTE(date, minDate)) || (maxDate && !dateutils.isLTE(date, maxDate));
-  }
+  };
 
   getAccessibilityLabel = (state, day) => {
     const today = XDate.locales[XDate.defaultLocale].today;
@@ -183,8 +184,7 @@ class Calendar extends Component {
     }
 
     return `${isToday ? 'today' : ''} ${day.toString('dddd d MMMM yyyy')} ${markingLabel}`;
-  }
-
+  };
 
   renderDay(day, id) {
     const minDate = parseDate(this.props.minDate);
@@ -201,43 +201,87 @@ class Calendar extends Component {
     }
 
     if (!dateutils.sameMonth(day, this.state.currentMonth) && this.props.hideExtraDays) {
-      return (<View key={id} style={{flex: 1}}/>);
+      return <View key={id} style={{flex: 1}} />;
     }
 
     const DayComp = this.getDayComponent();
     const date = day.getDate();
     const dateAsObject = xdateToData(day);
-    let startingDay = null
-    let endingDay = null
+    let startingDay = null;
+    let endingDay = null;
     if (this.props.markedDates) {
       Object.keys(this.props.markedDates).forEach((key) => {
         if (this.props.markedDates[key].startingDay) {
-          startingDay = key
+          startingDay = key;
         } else if (this.props.markedDates[key].endingDay) {
-          endingDay = key
+          endingDay = key;
         }
-      })
+      });
     }
-    const isStartingDay = startingDay !== null && startingDay === dateAsObject.dateString && this.props.markedDates && Object.keys(this.props.markedDates).length > 1
-    const isEndingDay = endingDay !== null && endingDay === dateAsObject.dateString && this.props.markedDates && Object.keys(this.props.markedDates).length > 1
-    const dateIndex = Object.keys(this.props.markedDates ? this.props.markedDates : []).findIndex((val) => val === dateAsObject.dateString)
-    const isMidDay = this.props.markedDates && !isStartingDay && !isEndingDay && dateIndex !== -1 && dateIndex !== 0 && dateIndex !== Object.keys(this.props.markedDates).length - 1
+    const isStartingDay =
+      startingDay !== null &&
+      startingDay === dateAsObject.dateString &&
+      this.props.markedDates &&
+      Object.keys(this.props.markedDates).length > 1;
+    const isEndingDay =
+      endingDay !== null &&
+      endingDay === dateAsObject.dateString &&
+      this.props.markedDates &&
+      Object.keys(this.props.markedDates).length > 1;
+    const dateIndex = Object.keys(this.props.markedDates ? this.props.markedDates : []).findIndex(
+      (val) => val === dateAsObject.dateString,
+    );
+    const isMidDay =
+      this.props.markedDates &&
+      !isStartingDay &&
+      !isEndingDay &&
+      dateIndex !== -1 &&
+      dateIndex !== 0 &&
+      dateIndex !== Object.keys(this.props.markedDates).length - 1;
     const accessibilityLabel = this.getAccessibilityLabel(state, day);
 
     const handleLayout = (e) => {
-      const { width } = e.nativeEvent.layout
+      const {width} = e.nativeEvent.layout;
       this.setState((prevState) => ({
         ...prevState,
-        dayItemWidth: width
-      }))
-    }
-
-    const { dayItemWidth } = this.state
-
+        dayItemWidth: width,
+      }));
+    };
+    const {dayItemWidth} = this.state;
+    const marking = this.getDateMarking(day);
     return (
-      <View onLayout={handleLayout} style={[{ flex: 1, alignItems: 'center', zIndex: 50 }, isMidDay && { backgroundColor: "#fef4e6" }]} key={id}>
-        {isStartingDay && <View style={{ position: "absolute", top: 0, right: 0, left: dayItemWidth / 2, bottom: 0, backgroundColor: "#fef4e6" }} />}
-        {isEndingDay && <View style={{ position: "absolute", top: 0, right: dayItemWidth / 2, left: 0, bottom: 0, backgroundColor: "#fef4e6" }} />}
+      <View
+        onLayout={handleLayout}
+        style={[
+          {flex: 1, alignItems: 'center', zIndex: 50},
+          isMidDay && !marking.disabled && {backgroundColor: '#fef4e6'},
+        ]}
+        key={id}
+      >
+        {isStartingDay && !marking.disabled && (
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              left: dayItemWidth / 2,
+              bottom: 0,
+              backgroundColor: '#fef4e6',
+            }}
+          />
+        )}
+        {isEndingDay && !marking.disabled && (
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: dayItemWidth / 2,
+              left: 0,
+              bottom: 0,
+              backgroundColor: '#fef4e6',
+            }}
+          />
+        )}
         <DayComp
           testID={`${SELECT_DATE_SLOT}-${dateAsObject.dateString}`}
           state={state}
@@ -245,7 +289,7 @@ class Calendar extends Component {
           onPress={this.pressDay}
           onLongPress={this.longPressDay}
           date={dateAsObject}
-          marking={this.getDateMarking(day)}
+          marking={marking}
           accessibilityLabel={accessibilityLabel}
           disableAllTouchEventsForDisabledDays={this.props.disableAllTouchEventsForDisabledDays}
         >
@@ -290,16 +334,16 @@ class Calendar extends Component {
     }
 
     switch (this.props.markingType) {
-    case 'period':
-      return UnitDay;
-    case 'multi-dot':
-      return MultiDotDay;
-    case 'multi-period':
-      return MultiPeriodDay;
-    case 'custom':
-      return SingleDay;
-    default:
-      return Day;
+      case 'period':
+        return UnitDay;
+      case 'multi-dot':
+        return MultiDotDay;
+      case 'multi-period':
+        return MultiPeriodDay;
+      case 'custom':
+        return SingleDay;
+      default:
+        return Day;
     }
   }
 
@@ -320,35 +364,30 @@ class Calendar extends Component {
     const {SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT} = swipeDirections;
 
     switch (gestureName) {
-    case SWIPE_UP:
-    case SWIPE_DOWN:
-      break;
-    case SWIPE_LEFT:
-      this.onSwipeLeft();
-      break;
-    case SWIPE_RIGHT:
-      this.onSwipeRight();
-      break;
+      case SWIPE_UP:
+      case SWIPE_DOWN:
+        break;
+      case SWIPE_LEFT:
+        this.onSwipeLeft();
+        break;
+      case SWIPE_RIGHT:
+        this.onSwipeRight();
+        break;
     }
-  }
+  };
 
   onSwipeLeft = () => {
     this.header.onPressRight();
-  }
+  };
 
   onSwipeRight = () => {
     this.header.onPressLeft();
-  }
+  };
 
   renderWeekNumber(weekNumber) {
     return (
       <View style={{flex: 1, alignItems: 'center'}} key={`week-container-${weekNumber}`}>
-        <Day
-          key={`week-${weekNumber}`}
-          theme={this.props.theme}
-          marking={{disableTouchEvent: true}}
-          state='disabled'
-        >
+        <Day key={`week-${weekNumber}`} theme={this.props.theme} marking={{disableTouchEvent: true}} state="disabled">
           {weekNumber}
         </Day>
       </View>
@@ -364,7 +403,11 @@ class Calendar extends Component {
     if (this.props.showWeekNumbers) {
       week.unshift(this.renderWeekNumber(days[days.length - 1].getWeek()));
     }
-    return (<View style={[this.style.week]} key={id}>{week}</View>);
+    return (
+      <View style={[this.style.week]} key={id}>
+        {week}
+      </View>
+    );
   }
 
   render() {
@@ -382,8 +425,7 @@ class Calendar extends Component {
     const current = parseDate(this.props.current);
     if (current) {
       const lastMonthOfDay = current.clone().addMonths(1, true).setDate(1).addDays(-1).toString('yyyy-MM-dd');
-      if (this.props.displayLoadingIndicator &&
-        !(this.props.markedDates && this.props.markedDates[lastMonthOfDay])) {
+      if (this.props.displayLoadingIndicator && !(this.props.markedDates && this.props.markedDates[lastMonthOfDay])) {
         indicator = true;
       }
     }
@@ -393,7 +435,7 @@ class Calendar extends Component {
 
     const headerProps = {
       testID: this.props.testID,
-      ref: c => this.header = c,
+      ref: (c) => (this.header = c),
       style: this.props.headerStyle,
       theme: this.props.theme,
       hideArrows: this.props.hideArrows,
@@ -412,16 +454,16 @@ class Calendar extends Component {
       disableArrowLeft: this.props.disableArrowLeft,
       disableArrowRight: this.props.disableArrowRight,
       disabledDaysIndexes: this.props.disabledDaysIndexes,
-      renderHeader: this.props.renderHeader
+      renderHeader: this.props.renderHeader,
     };
     const CustomHeader = this.props.customHeader;
     const innerStyles = [
       this.style.container,
       // this.props.style,
       {
-        flex: 1
-      }
-    ]
+        flex: 1,
+      },
+    ];
     return (
       <GestureComponent {...gestureProps}>
         <View
@@ -429,10 +471,7 @@ class Calendar extends Component {
           accessibilityElementsHidden={this.props.accessibilityElementsHidden} // iOS
           importantForAccessibility={this.props.importantForAccessibility} // Android
         >
-          { CustomHeader
-            ? <CustomHeader {...headerProps}/>
-            : <CalendarHeader {...headerProps}/>
-          }
+          {CustomHeader ? <CustomHeader {...headerProps} /> : <CalendarHeader {...headerProps} />}
           <View style={this.style.monthView}>{weeks}</View>
         </View>
       </GestureComponent>
